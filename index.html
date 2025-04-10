@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            text-align: center;
+            padding: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #4CAF50;
+            margin-bottom: 0;
+        }
+
+        h3 {
+            font-size: 1.5em;
+            color: #555;
+            margin-top: 0;
+        }
+
+        p#prompt {
+            color: #666;
+            margin-top: 20px;
+            margin-bottom: 40px;
+            word-wrap: break-word;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        textarea {
+            width: 70%;
+            height: 150px;
+            font-size: 1.2em;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        textarea:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #wpmDisplay {
+            font-size: 1.5em;
+            margin-top: 20px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        #countdown {
+            font-size: 2em;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 30px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .countdown-animation {
+            animation: countdown 1s ease-in-out;
+        }
+
+        @keyframes countdown {
+            0% { color: #e74c3c; }
+            50% { color: #f39c12; }
+            100% { color: #2ecc71; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>How fast can you type?</h1>
+    <h3>Type the following message:</h3>
+    <p id="prompt">Click "Start" to begin typing the prompt.</p>
+
+    <textarea id="input" placeholder="Start typing here..." disabled></textarea><br><br>
+    <button onclick="startTest()">Start</button>
+
+    <p id="wpmDisplay"></p>
+    <p id="countdown"></p>
+</div>
+
+<script>
+    const paragraphs = [
+        "You cannot enter here. Go back to the abyss prepared for you! Go back! Fall into the nothingness that awaits you and your master!",
+        "Home is behind, the world ahead,\n" +
+        "and there are many paths to tread\n" +
+        "through shadows to the edge of night,\n" +
+        "until the stars are all alight.",
+        "How do you pick up the threads of an old life? How do you go on, when in your heart, you begin to understand, " +
+        "there is no going back? There are some things that time cannot mend, some hurts that go too deep that have taken hold.",
+        "One Ring to rule them all, One Ring to find them, One Ring to bring them all and in the darkness bind them.",
+        "Far over the misty mountains cold\n" +
+        "To dungeons deep and caverns old\n" +
+        "We must away ere break of day\n" +
+        "To seek the pale enchanted gold."
+    ];
+
+    let target;
+    let startTime;
+    let countdownInterval;
+
+    function startTest() {
+        const input = document.getElementById("input");
+        const countdownDisplay = document.getElementById("countdown");
+        const promptElement = document.getElementById("prompt");
+        input.value = "";
+        input.disabled = true;
+
+        target = paragraphs[Math.floor(Math.random() * paragraphs.length)];
+        promptElement.innerText = target;
+
+        let countdown = 3;
+        countdownDisplay.innerText = countdown;
+
+        countdownInterval = setInterval(() => {
+            countdown--;
+            countdownDisplay.innerText = countdown;
+            countdownDisplay.classList.add('countdown-animation');
+            if (countdown === 0) {
+                clearInterval(countdownInterval);
+                countdownDisplay.innerText = "Go!";
+                input.disabled = false;
+                input.focus();
+                startTime = new Date();
+                input.addEventListener("input", onTyping);
+            }
+        }, 1000);
+    }
+
+    function onTyping() {
+        const inputText = document.getElementById("input").value;
+
+        if (inputText === target) {
+            const endTime = new Date();
+            const seconds = (endTime - startTime) / 1000;
+            const words = target.split(" ").length;
+            const wpm = (words / seconds) * 60;
+
+            document.getElementById("wpmDisplay").innerText = `You typed at ${wpm.toFixed(2)} WPM!`;
+
+            document.getElementById("input").disabled = true;
+            submitResult(wpm);
+        }
+    }
+
+    async function submitResult(wpm) {
+        const result = { wpm };
+
+        await fetch("http://127.0.0.1:8000/typing", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(result)
+        });
+
+        console.log("Result submitted!");
+    }
+</script>
+</body>
+</html>
