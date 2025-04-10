@@ -21,11 +21,11 @@ def read_index():
     index_file = Path(__file__).parent / "frontend" / "index.html"
     return index_file.read_text()
 
-@app.post('/typing')
-def log_result(result: Capture):
-    results.append(result)
-    return {'message': 'Result is logged!', 'data': result}
-
-@app.get('/typing')
-def get_results():
-    return results
+# @app.post('/typing')
+# def log_result(result: Capture):
+#     results.append(result)
+#     return {'message': 'Result is logged!', 'data': result}
+#
+# @app.get('/typing')
+# def get_results():
+#     return results
